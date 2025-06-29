@@ -4,15 +4,38 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class OrderController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $user = $request->user();
+
+        $orders = $user->orders;
+
+        return response([
+            'status' => 200,
+            'message' => 'orders successfully retrieved',
+            'data' => $orders
+        ]);
+    }
+
+    public function checkout(Order $order)
+    {
+        Gate::authorize('checkout', $order);
+
+        $order->update([
+            'status' => 'success'
+        ]);
+
+        return response([
+            'status' => 200,
+            'message' => 'checkout success'
+        ]);
     }
 
     /**
@@ -54,7 +77,21 @@ class OrderController extends Controller
      */
     public function update(Request $request, Order $order)
     {
-        //
+        Gate::authorize('checkout', $order);
+
+        $validatedFields = $request->validate([
+            'quantity' => 'required'
+        ]);
+
+        $order->update([
+            'quantity' => $validatedFields['quantity']
+        ]);
+
+        return response([
+            'status' => 200,
+            'message' => 'order successfully updated',
+            'data' => $order
+        ]);
     }
 
     /**
@@ -62,6 +99,13 @@ class OrderController extends Controller
      */
     public function destroy(Order $order)
     {
-        //
+        Gate::authorize('checkout', $order);
+
+        $order->delete();
+
+        return response([
+            'status' => 200,
+            'message' => 'order successfully deleted'
+        ]);
     }
 }
