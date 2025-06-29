@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +20,9 @@ Route::middleware('auth:sanctum')->group(function () {
         ], 200);
     });
     Route::get('/logout', [AuthController::class, 'logout']);
+
+    Route::apiResource('products', ProductController::class);
+
+    Route::apiResource('orders', OrderController::class);
+    Route::get('/orders/{order}', [OrderController::class, 'checkout']);
 });
